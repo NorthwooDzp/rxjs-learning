@@ -1,7 +1,7 @@
 /*---===lesson 01===---*/
 //first stream
 (function () {
-    var stream$ = rxjs.Observable.create((observer) => {
+    var stream$ = Rx.Observable.create((observer) => {
         observer.next('now');
 
         setTimeout(() => {
@@ -20,6 +20,12 @@
             observer.next('1 sec')
         }, 1000);
 
+        setTimeout(() => {
+            observer.complete();
+        }, 6000);
+
+
+
     });
     stream$.subscribe(
         data => { // data
@@ -35,18 +41,18 @@
 
 (function () {
     var button = document.querySelector('button');
-    var btn$ = rxjs.fromEvent(button, 'click');
+    var btn$ = Rx.Observable.fromEvent(button, 'click');
 
 
     btn$.subscribe(event => {
         console.log(event);
     });
 
-    rxjs.fromEvent(document.querySelector('input'), 'keyup').subscribe(({target}) => {
+    Rx.Observable.fromEvent(document.querySelector('input'), 'keyup').subscribe(({target}) => {
         console.log(target.value);
     });
 
-    rxjs.fromEvent(document, 'mousemove').subscribe(ev => {
+    Rx.Observable.fromEvent(document, 'mousemove').subscribe(ev => {
         document.querySelector('#x').innerHTML = `X => ${ev.clientX}`;
         document.querySelector('#y').innerHTML = `Y => ${ev.clientY}`;
     });
@@ -54,14 +60,34 @@
 
 //simple operators
 
-(function () {
-    rxjs.of(1, 2, 3, 4, 'abcd').subscribe(data => {
-        console.log(data);
-    }, err => {
-        console.log(err);
-    }, () => {
-        console.log('complete');
-    });
+let createSubscribe = (name) => {
+    return {
+        next(x) {
+            console.log(`Data ${name} => ${x}`);
+        },
+        error(err) {
+            console.log(`Error ${name} => ${err}`)
+        },
+        complete() {
+            console.log(`Completed!`);
+        }
+    }
+}
 
+(function () {
+    Rx.Observable.of(1, 2, 3, 4, 'abcd', [5, 7, 9], {foo: 'bar'})
+        .subscribe(createSubscribe('of'));
+
+
+    Rx.Observable.interval(700)
+        .take(5)
+        .subscribe(createSubscribe('interval'));
+
+    Rx.Observable.timer(8000, 350).
+        take(4)
+        .subscribe(createSubscribe('timer'));
+
+    Rx.Observable.range(5, 15)
+        .subscribe(createSubscribe('range'));
 
 })();
