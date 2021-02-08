@@ -17,32 +17,25 @@ export class HomeComponent implements OnInit {
 
     public ngOnInit(): void {
 
-        const interval$: Observable<number> = interval(1000);
-
-        const timer$: Observable<number> = timer(3000, 1000);
-
-        const clicks$: Observable<Event> = fromEvent(document, 'click');
-
-        interval$.subscribe(val => {
-            console.log('stream 1 => ', val);
-        })
-
-        timer$.subscribe(val => {
-            console.log('stream 2 => ', val);
-        })
-
-        const clicksSubs: Subscription = clicks$.subscribe(ev => {
-            console.log('clicks => ', ev);
-        }, err => { // wont run complete after and won't emit new values
-            console.log('click err => ', err);
-        }, () => { // wont throw errors and emit new values
-            console.log('clicks completed');
+        const http$ = Observable.create(observer => {
+            fetch('http://localhost:9000/api/courses')
+                .then(response => response.json())
+                .then(body => {
+                    observer.next(body);
+                    observer.complete();
+                })
+                .catch(err => {
+                    observer.error(err);
+                });
         });
 
-        setTimeout(() => {
-            clicksSubs.unsubscribe();
-        }, 6000)
-
+        http$.subscribe(val => {
+            console.log(val);
+        }, err => {
+            console.log(err);
+        }, () => {
+            console.log('complete');
+        });
 
     }
 

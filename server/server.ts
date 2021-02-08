@@ -6,10 +6,12 @@ import {searchLessons} from "./search-lessons.route";
 import {saveCourse} from './save-course.route';
 
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app: Application = express();
 
 app.use(bodyParser.json());
+app.use(cors());
 
 app.route('/api/courses').get(getAllCourses);
 
