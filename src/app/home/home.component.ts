@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Course } from '../model/course';
 import { fromEvent, interval, Observable, of, Subscription, timer } from 'rxjs';
 import { catchError, delayWhen, map, retryWhen, shareReplay, tap, timeout } from 'rxjs/operators';
+import { createHttpObservable } from '../common/util';
 
 
 @Component({
@@ -17,19 +18,12 @@ export class HomeComponent implements OnInit {
 
     public ngOnInit(): void {
 
-        const http$ = Observable.create(observer => {
-            fetch('http://localhost:9000/api/courses')
-                .then(response => response.json())
-                .then(body => {
-                    observer.next(body);
-                    observer.complete();
-                })
-                .catch(err => {
-                    observer.error(err);
-                });
-        });
+        const http$: Observable<any> = createHttpObservable('http://localhost:9000/api/courses');
+        const courses$ = http$.pipe(
+            map(res => Object.values(res.payload))
+        );
 
-        http$.subscribe(val => {
+        courses$.subscribe(val => {
             console.log(val);
         }, err => {
             console.log(err);
@@ -40,3 +34,4 @@ export class HomeComponent implements OnInit {
     }
 
 }
+
