@@ -3,8 +3,16 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Course } from '../model/course';
 import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import * as moment from 'moment';
-import { fromEvent } from 'rxjs';
-import { concatMap, debounceTime, distinctUntilChanged, exhaustMap, filter, mergeMap } from 'rxjs/operators';
+import { fromEvent, Observable } from 'rxjs';
+import {
+    concatMap,
+    debounceTime,
+    distinctUntilChanged,
+    exhaustMap,
+    filter,
+    mergeMap,
+    switchMap
+} from 'rxjs/operators';
 import { fromPromise } from 'rxjs/internal-compatibility';
 
 @Component({
@@ -41,21 +49,23 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
         this.form.valueChanges
             .pipe(
                 filter(() => this.form.valid),
-                concatMap(changes => this.saveCourse(changes))
-            ).subscribe(val => {
-            console.log(val);
-        });
+                // concatMap(changes => this.saveCourse(changes))
+                // mergeMap(changes => this.saveCourse(changes))
+                exhaustMap(changes => this.saveCourse(changes))
+            ).subscribe(console.log);
 
     }
 
 
     ngAfterViewInit() {
-
-
+        fromEvent(this.saveButton.nativeElement, 'click')
+            .pipe(
+                exhaustMap(() => this.saveCourse(this.form.value))
+            ).subscribe();
     }
 
-    saveCourse(changes) {
-        return fromPromise(fetch(`/api/courses/${this.course.id}`, {
+    saveCourse(changes): Observable<any> {
+        return fromPromise(fetch(`http://localhost:9000/api/courses/${this.course.id}`, {
             method: 'PUT',
             body: JSON.stringify(changes),
             headers: {
