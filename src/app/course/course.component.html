@@ -10,7 +10,7 @@
 
     <mat-form-field class="search-bar">
 
-        <input matInput placeholder="Type your search" #searchInput autocomplete="off">
+        <input matInput placeholder="Type your search" [formControl]="searchInput" autocomplete="off">
 
     </mat-form-field>
 

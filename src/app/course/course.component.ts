@@ -16,6 +16,7 @@ import {
 import {merge, fromEvent, Observable, concat} from 'rxjs';
 import {Lesson} from '../model/lesson';
 import { createHttpObservable } from '../common/util';
+import { FormControl } from '@angular/forms';
 
 
 @Component({
@@ -28,9 +29,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
     courseId: string;
     course$: Observable<Course>;
     lessons$: Observable<Lesson[]>;
-
-
-    @ViewChild('searchInput', { static: true }) input: ElementRef;
+    searchInput: FormControl;
 
     constructor(private route: ActivatedRoute) {
 
@@ -38,20 +37,15 @@ export class CourseComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-
+        this.searchInput = new FormControl('')
         this.courseId = this.route.snapshot.params['id'];
-
         this.course$ = createHttpObservable(`/api/courses/${this.courseId}`);
-
-
-
     }
 
     ngAfterViewInit() {
 
-        const searchLessons$ = fromEvent(this.input.nativeElement, 'keyup')
+        const searchLessons$ = this.searchInput.valueChanges
             .pipe(
-                map(event => event.target.value),
                 debounceTime(200),
                 distinctUntilChanged(),
                 switchMap(val => this.loadLessons(val))
