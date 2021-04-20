@@ -40,7 +40,7 @@ export class AboutComponent implements OnInit {
             intervalSubs.unsubscribe()
         }, 5000)
 
-        const http$ = createHttpObservable('http://localhost:9000/api/courses');
+        const http$ = createHttpObservable('/api/courses');
 
         const subs = http$.subscribe();
 
